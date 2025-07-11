@@ -13,16 +13,21 @@ LOG_FILE="$MIHOMO_DATA/mihomo-magisk.log"
 # PID 文件路径
 PID_FILE="$MODDIR/mihomo.pid"
 
-# 检查 mihomo 是否已在运行（增强：校验进程名）
+# 检查 mihomo 是否已在运行
 isMihomoRunning() {
   if [ -f "$PID_FILE" ]; then
     pid=$(cat "$PID_FILE")
     if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
-      # 校验进程名是否为 mihomo
-      pname=$(ps -p "$pid" -o comm= 2>/dev/null | tr -d '\n')
-      if [ "$pname" = "mihomo" ]; then
+      # 校验 /proc/$pid/exe 指向的可执行文件名
+      exe_link=$(readlink "/proc/$pid/exe" 2>/dev/null)
+      if [ "$exe_link" = "$MIHOMO_BIN" ]; then
         return 0
       fi
+      # 或进一步校验 /proc/$pid/cmdline
+      cmdline=$(cat "/proc/$pid/cmdline" 2>/dev/null | tr '\0' ' ')
+      case "$cmdline" in
+        *"$MIHOMO_BIN"*) return 0;;
+      esac
     fi
   fi
   return 1
