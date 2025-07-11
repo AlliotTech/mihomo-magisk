@@ -33,16 +33,11 @@ isMihomoRunning() {
   return 1
 }
 
-# 日志轮换函数，仅操作日志目录下的日志文件，防止误删其他文件（加锁）
+# 日志轮换函数，不加锁，仅操作日志目录下的日志文件
 rotateLogs() {
   LOG_DIR="$MIHOMO_DATA"
   MAX_LOG_SIZE=1048576  # 1MB
   LOG_BAK="$LOG_FILE.1"
-  LOCK_FILE="$LOG_FILE.lock"
-
-  # 加锁，避免并发写
-  exec 9>"$LOCK_FILE"
-  flock 9
 
   if [ -f "$LOG_FILE" ]; then
     logSize=$(stat -c%s "$LOG_FILE" 2>/dev/null || stat -f%z "$LOG_FILE")
@@ -52,10 +47,6 @@ rotateLogs() {
       echo "[日志轮换] mihomo-magisk.log 已轮换为 mihomo-magisk.log.1" >> "$LOG_FILE"
     fi
   fi
-
-  # 解锁
-  flock -u 9
-  rm -f "$LOCK_FILE"
 }
 
 # 启动 mihomo（增强：检测二进制）
