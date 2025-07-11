@@ -1,0 +1,6 @@
+id=mihomo
+name=Mihomo Daemon
+version=v0.0.1
+versionCode=20250711
+author=AlliotTech
+description=🚀 Mihomo Daemon - 以 root 权限后台运行 mihomo 内核，安全日志轮换 🛡️ 
